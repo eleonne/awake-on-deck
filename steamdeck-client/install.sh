@@ -31,7 +31,19 @@ fi
 
 cd "$APP_DIR"
 
-# ── 2. Vendor dependencies into lib/ ─────────────────────────────────────────
+# ── 2. Ensure pip is available ───────────────────────────────────────────────
+info "Checking for pip ..."
+if ! $PYTHON -m pip --version > /dev/null 2>&1; then
+    warn "pip not found. Bootstrapping via ensurepip ..."
+    if ! $PYTHON -m ensurepip --upgrade 2>/dev/null; then
+        warn "ensurepip failed (read-only fs). Fetching get-pip.py ..."
+        curl -sSL https://bootstrap.pypa.io/get-pip.py | $PYTHON \
+            || die "Could not install pip. Check your internet connection."
+    fi
+    info "pip installed."
+fi
+
+# ── 3. Vendor dependencies into lib/ ─────────────────────────────────────────
 info "Installing Python dependencies into $APP_DIR/lib/ ..."
 mkdir -p lib
 $PYTHON -m pip install --target=lib --upgrade \
@@ -42,11 +54,11 @@ $PYTHON -m pip install --target=lib --upgrade \
 
 success "Dependencies installed."
 
-# ── 3. Make scripts executable ────────────────────────────────────────────────
+# ── 4. Make scripts executable ────────────────────────────────────────────────
 chmod +x "$APP_DIR/launch.sh"
 chmod +x "$REPO_DIR/install.sh"
 
-# ── 4. Add to Steam as a non-Steam shortcut ───────────────────────────────────
+# ── 5. Add to Steam as a non-Steam shortcut ───────────────────────────────────
 info "Adding '$APP_NAME' to Steam shortcuts ..."
 
 # Steam must be closed while we edit shortcuts.vdf, or it will overwrite our changes.
@@ -131,7 +143,7 @@ PYEOF
 
 success "'$APP_NAME' added to Steam shortcuts."
 
-# ── 5. Relaunch Steam ─────────────────────────────────────────────────────────
+# ── 6. Relaunch Steam ─────────────────────────────────────────────────────────
 info "Relaunching Steam ..."
 nohup steam > /dev/null 2>&1 &
 disown
