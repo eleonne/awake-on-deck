@@ -31,14 +31,17 @@ fi
 
 cd "$APP_DIR"
 
-# ── 2. Ensure pip is available ───────────────────────────────────────────────
+# ── 2. Ensure pip is available ────────────────────────────────────────────────
 info "Checking for pip ..."
 if ! $PYTHON -m pip --version > /dev/null 2>&1; then
     warn "pip not found. Bootstrapping via ensurepip ..."
     if ! $PYTHON -m ensurepip --upgrade 2>/dev/null; then
-        warn "ensurepip failed (read-only fs). Fetching get-pip.py ..."
-        curl -sSL https://bootstrap.pypa.io/get-pip.py | $PYTHON \
-            || die "Could not install pip. Check your internet connection."
+        warn "ensurepip failed. Fetching get-pip.py ..."
+        curl -sSL https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py \
+            || die "Could not download get-pip.py. Check your internet connection."
+        # --break-system-packages required on SteamOS (PEP 668 externally-managed-environment)
+        $PYTHON /tmp/get-pip.py --break-system-packages \
+            || die "Could not install pip."
     fi
     info "pip installed."
 fi
@@ -46,7 +49,12 @@ fi
 # ── 3. Vendor dependencies into lib/ ─────────────────────────────────────────
 info "Installing Python dependencies into $APP_DIR/lib/ ..."
 mkdir -p lib
-$PYTHON -m pip install --target=lib --upgrade \
+# --target keeps everything inside lib/, never touching the system Python
+# --break-system-packages bypasses PEP 668 restriction on SteamOS
+$PYTHON -m pip install \
+    --target=lib \
+    --upgrade \
+    --break-system-packages \
     "pygame-ce>=2.4" \
     "wakeonlan>=3.0" \
     "vdf>=3.4" \
@@ -61,7 +69,7 @@ chmod +x "$REPO_DIR/install.sh"
 # ── 5. Add to Steam as a non-Steam shortcut ───────────────────────────────────
 info "Adding '$APP_NAME' to Steam shortcuts ..."
 
-# Steam must be closed while we edit shortcuts.vdf, or it will overwrite our changes.
+# Steam must be closed while we edit shortcuts.vdf — it overwrites on exit
 if pgrep -x steam > /dev/null; then
     warn "Steam is running. Closing it now to update shortcuts safely ..."
     steam -shutdown 2>/dev/null || true
@@ -116,21 +124,21 @@ for k in to_remove:
 next_key = str(max((int(k) for k in shortcuts.keys()), default=-1) + 1)
 
 shortcuts[next_key] = {
-    "AppName":            app_name,
-    "Exe":                f'"{launch_sh}"',
-    "StartDir":           f'"{app_dir}"',
-    "icon":               "",
-    "ShortcutPath":       "",
-    "LaunchOptions":      "",
-    "IsHidden":           0,
-    "AllowDesktopConfig": 1,
-    "AllowOverlay":       1,
-    "OpenVR":             0,
-    "Devkit":             0,
-    "DevkitGameID":       "",
+    "AppName":             app_name,
+    "Exe":                 f'"{launch_sh}"',
+    "StartDir":            f'"{app_dir}"',
+    "icon":                "",
+    "ShortcutPath":        "",
+    "LaunchOptions":       "",
+    "IsHidden":            0,
+    "AllowDesktopConfig":  1,
+    "AllowOverlay":        1,
+    "OpenVR":              0,
+    "Devkit":              0,
+    "DevkitGameID":        "",
     "DevkitOverrideAppID": 0,
-    "LastPlayTime":       int(time.time()),
-    "tags":               {},
+    "LastPlayTime":        int(time.time()),
+    "tags":                {},
 }
 
 data["shortcuts"] = shortcuts
