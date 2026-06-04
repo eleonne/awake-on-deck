@@ -64,7 +64,7 @@ success "Dependencies installed."
 
 # ── 4. Make scripts executable ────────────────────────────────────────────────
 chmod +x "$APP_DIR/launch.sh"
-chmod +x "$REPO_DIR/install.sh"
+chmod +x "$APP_DIR/install.sh"
 
 # ── 5. Add to Steam as a non-Steam shortcut ───────────────────────────────────
 info "Adding '$APP_NAME' to Steam shortcuts ..."
@@ -159,5 +159,5 @@ disown
 success "Done! '$APP_NAME' will appear in your Steam library under Non-Steam games."
 echo ""
 echo "  To launch in Game Mode, find '$APP_NAME' in your library."
-echo "  To update later, re-run:  bash $REPO_DIR/install.sh"
+echo "  To update later, re-run:  bash $APP_DIR/install.sh"
 echo ""
