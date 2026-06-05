@@ -191,11 +191,12 @@ An uninstall script `uninstall.ps1` stops and removes the service, deletes the C
 
 - Use `ILogger<T>` injected via primary constructor — never static loggers
 - In production (installed service), logs go to Windows Event Log under source `AwakeOnDeck`
+- Be verbose when loging in the Windows Event Log
 - In development (`dotnet run`), logs go to console
 - Log levels:
-  - `Information`: service start/stop, successful unlock, credential manager operations
+  - `Information`: service start/stop, successful unlock, credential manager operations, step-by-step unlock process
   - `Warning`: invalid/rejected UDP packets, session already unlocked (no-op)
-  - `Error`: P/Invoke failures, missing registry key, credential read failures
+  - `Error`: P/Invoke failures, missing registry key, credential read failures, failure to unlock
 - Never log the password or HMAC secret at any log level
 
 ## Running in development
