@@ -21,7 +21,9 @@ die()     { echo -e "\033[1;31m[awake] ERROR:\033[0m $*" >&2; exit 1; }
 # ── 1. Clone or update repo ───────────────────────────────────────────────────
 if [ -d "$REPO_DIR/.git" ]; then
     info "Updating existing installation at $REPO_DIR ..."
-    git -C "$REPO_DIR" pull --ff-only || die "git pull failed. Resolve conflicts manually."
+    git -C "$REPO_DIR" fetch --all || die "git fetch failed. Check your internet connection."
+    git -C "$REPO_DIR" reset --hard origin/main || die "git reset failed."
+    git -C "$REPO_DIR" clean -fd || die "git clean failed."
 else
     info "Cloning $REPO_URL → $REPO_DIR ..."
     git clone "$REPO_URL" "$REPO_DIR" || die "git clone failed. Check your internet connection."
@@ -39,7 +41,6 @@ if ! $PYTHON -m pip --version > /dev/null 2>&1; then
         warn "ensurepip failed. Fetching get-pip.py ..."
         curl -sSL https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py \
             || die "Could not download get-pip.py. Check your internet connection."
-        # --break-system-packages required on SteamOS (PEP 668 externally-managed-environment)
         $PYTHON /tmp/get-pip.py --break-system-packages \
             || die "Could not install pip."
     fi
@@ -49,8 +50,6 @@ fi
 # ── 3. Vendor dependencies into lib/ ─────────────────────────────────────────
 info "Installing Python dependencies into $APP_DIR/lib/ ..."
 mkdir -p lib
-# --target keeps everything inside lib/, never touching the system Python
-# --break-system-packages bypasses PEP 668 restriction on SteamOS
 $PYTHON -m pip install \
     --target=lib \
     --upgrade \
@@ -64,12 +63,11 @@ success "Dependencies installed."
 
 # ── 4. Make scripts executable ────────────────────────────────────────────────
 chmod +x "$APP_DIR/launch.sh"
-chmod +x "$APP_DIR/install.sh"
+chmod +x "$REPO_DIR/install.sh"
 
 # ── 5. Add to Steam as a non-Steam shortcut ───────────────────────────────────
 info "Adding '$APP_NAME' to Steam shortcuts ..."
 
-# Steam must be closed while we edit shortcuts.vdf — it overwrites on exit
 if pgrep -x steam > /dev/null; then
     warn "Steam is running. Closing it now to update shortcuts safely ..."
     steam -shutdown 2>/dev/null || true
@@ -81,7 +79,6 @@ if pgrep -x steam > /dev/null; then
     info "Steam closed."
 fi
 
-# Find the Steam userdata directory
 STEAM_USERDATA="$HOME/.steam/steam/userdata"
 [ -d "$STEAM_USERDATA" ] || STEAM_USERDATA="$HOME/.local/share/Steam/userdata"
 [ -d "$STEAM_USERDATA" ] || die "Cannot find Steam userdata directory. Is Steam installed?"
@@ -116,7 +113,6 @@ else:
 
 shortcuts = data.get("shortcuts", {})
 
-# Remove any existing entry with the same AppName to avoid duplicates
 to_remove = [k for k, v in shortcuts.items() if v.get("AppName") == app_name or v.get("appname") == app_name]
 for k in to_remove:
     del shortcuts[k]
@@ -159,5 +155,5 @@ disown
 success "Done! '$APP_NAME' will appear in your Steam library under Non-Steam games."
 echo ""
 echo "  To launch in Game Mode, find '$APP_NAME' in your library."
-echo "  To update later, re-run:  bash $APP_DIR/install.sh"
+echo "  To update later, re-run:  bash $REPO_DIR/install.sh"
 echo ""
