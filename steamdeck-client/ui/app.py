@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import queue
-import subprocess
 import threading
 from dataclasses import dataclass, field
 from enum import Enum, auto
@@ -20,7 +19,6 @@ from ui.screens.settings import SettingsScreen
 from ui.screens.status import (
     STATE_DONE,
     STATE_ERROR,
-    STATE_LAUNCHING,
     STATE_POLLING,
     STATE_UNLOCKING,
     STATE_WAKING,
@@ -168,7 +166,7 @@ class App:
         t.start()
 
     def _worker(self) -> None:
-        """Background thread: WoL → poll → unlock → launch."""
+        """Background thread: WoL → poll → unlock → done."""
         cfg = self._state.config
         cancel = self._state.cancel_event
         q = self._state.ui_queue
@@ -189,11 +187,6 @@ class App:
             if cancel.is_set():
                 return
 
-            q.put(StateMessage(STATE_LAUNCHING, message="Launching Steam Remote Play..."))
-            self._launch_steam()
-            if cancel.is_set():
-                return
-
             q.put(StateMessage(STATE_DONE))
 
         except WoLError as exc:
@@ -208,13 +201,6 @@ class App:
         except Exception as exc:
             logger.exception("Unexpected error in worker")
             q.put(StateMessage(STATE_ERROR, error=f"Unexpected error: {exc}"))
-
-    def _launch_steam(self) -> None:
-        """Launch Steam with remote play URL."""
-        cfg = self._state.config
-        url = f"steam://connect/{cfg.pc_ip}"
-        logger.info("Launching Steam: %s", url)
-        subprocess.Popen(["steam", url])
 
     def _handle_state_message(self, msg: StateMessage) -> None:
         """Update status screen from UI queue message."""
