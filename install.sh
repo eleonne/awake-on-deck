@@ -95,7 +95,7 @@ info "Shortcuts file: $SHORTCUTS_FILE"
 mkdir -p "$SHORTCUTS_DIR"
 
 $PYTHON - <<PYEOF
-import sys, os
+import sys, os, binascii, shutil
 sys.path.insert(0, "$APP_DIR/lib")
 
 import vdf, time
@@ -119,11 +119,13 @@ for k in to_remove:
 
 next_key = str(max((int(k) for k in shortcuts.keys()), default=-1) + 1)
 
+exe_field = f'"{launch_sh}"'
+
 shortcuts[next_key] = {
     "AppName":             app_name,
-    "Exe":                 f'"{launch_sh}"',
+    "Exe":                 exe_field,
     "StartDir":            f'"{app_dir}"',
-    "icon":                "",
+    "icon":                f"{app_dir}/img/icon.png",
     "ShortcutPath":        "",
     "LaunchOptions":       "",
     "IsHidden":            0,
@@ -143,6 +145,28 @@ with open(shortcuts_file, "wb") as f:
     vdf.binary_dump(data, f)
 
 print(f"  Shortcut written (index {next_key}).")
+
+# Steam artwork for non-Steam shortcuts is keyed by a CRC32-derived game ID.
+# Formula: crc32(Exe_field + AppName) | 0x80000000
+crc     = binascii.crc32((exe_field + app_name).encode("utf-8"))
+game_id = (crc | 0x80000000) & 0xffffffff
+
+grid_dir = os.path.join(os.path.dirname(shortcuts_file), "grid")
+os.makedirs(grid_dir, exist_ok=True)
+
+artwork = [
+    ("img/icon.png",  f"{game_id}_icon.png"),
+    ("img/hero.jpg",  f"{game_id}_hero.jpg"),
+    ("img/grid.jpg",  f"{game_id}p.jpg"),
+]
+for rel_src, dst_name in artwork:
+    src = os.path.join(app_dir, rel_src)
+    dst = os.path.join(grid_dir, dst_name)
+    if os.path.exists(src):
+        shutil.copy2(src, dst)
+        print(f"  Artwork installed: {dst_name}")
+    else:
+        print(f"  Warning: artwork not found: {src}")
 PYEOF
 
 success "'$APP_NAME' added to Steam shortcuts."
