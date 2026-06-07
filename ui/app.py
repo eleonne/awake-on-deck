@@ -61,9 +61,12 @@ class App:
         self._joystick: Optional[pygame.joystick.JoystickType] = None
         self._previous_screen: Screen = Screen.HOME
 
+        pygame.mixer.pre_init(44100, -16, 2, 512)
         pygame.init()
         pygame.display.set_caption("Awake on Deck")
-        self._screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self._screen = pygame.display.set_mode(
+            (WIDTH, HEIGHT), pygame.FULLSCREEN | pygame.SCALED
+        )
         self._clock = pygame.time.Clock()
 
         if pygame.joystick.get_count() > 0:
@@ -115,8 +118,8 @@ class App:
                         running = False
                         break
 
-                # Joystick Start button (index 7) opens settings from non-settings screens
-                if event.type == pygame.JOYBUTTONDOWN and event.button == 7:
+                # Joystick Select button (index 4) opens settings from non-settings screens
+                if event.type == pygame.JOYBUTTONDOWN and event.button == 4:
                     if self._state.current_screen != Screen.SETTINGS:
                         self._open_settings()
                         continue
