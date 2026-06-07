@@ -8,6 +8,6 @@ else
     export SDL_VIDEODRIVER=x11
 fi
 
-export PYTHONPATH="/home/deck/awake-on-deck/steamdeck-client/lib:$PYTHONPATH"
-cd /home/deck/awake-on-deck/steamdeck-client
+export PYTHONPATH="/home/deck/awake-on-deck/lib:$PYTHONPATH"
+cd /home/deck/awake-on-deck
 exec /usr/bin/python3 main.py "$@"

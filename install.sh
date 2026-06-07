@@ -29,7 +29,7 @@ else
     git clone "$REPO_URL" "$REPO_DIR" || die "git clone failed. Check your internet connection."
 fi
 
-[ -d "$APP_DIR" ] || die "Expected steamdeck-client/ folder not found inside repo. Check the repo structure."
+[ -d "$APP_DIR" ] || die "App directory not found at $APP_DIR. Check the repo structure."
 
 cd "$APP_DIR"
 
