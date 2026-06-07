@@ -14,14 +14,12 @@ import pygame
 
 from config import Config, load_config, save_config
 from poller import PollTimeoutError, poll_until_online
-from trigger import TriggerError, send_unlock
 from ui.screens.home import HomeScreen
 from ui.screens.settings import SettingsScreen
 from ui.screens.status import (
     STATE_DONE,
     STATE_ERROR,
     STATE_POLLING,
-    STATE_UNLOCKING,
     STATE_WAKING,
     StatusScreen,
 )
@@ -212,11 +210,6 @@ class App:
             if cancel.is_set():
                 return
 
-            q.put(StateMessage(STATE_UNLOCKING, message="Sending unlock signal..."))
-            send_unlock(cfg, cancel)
-            if cancel.is_set():
-                return
-
             q.put(StateMessage(STATE_DONE))
 
         except WoLError as exc:
@@ -224,9 +217,6 @@ class App:
             q.put(StateMessage(STATE_ERROR, error=str(exc)))
         except PollTimeoutError as exc:
             logger.error("Poll timeout: %s", exc)
-            q.put(StateMessage(STATE_ERROR, error=str(exc)))
-        except TriggerError as exc:
-            logger.error("Trigger error: %s", exc)
             q.put(StateMessage(STATE_ERROR, error=str(exc)))
         except Exception as exc:
             logger.exception("Unexpected error in worker")

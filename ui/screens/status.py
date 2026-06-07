@@ -19,26 +19,23 @@ ACCENT = (233, 69, 96)
 ERROR_COLOR = (220, 80, 80)
 SUBTITLE_COLOR = (180, 180, 200)
 
-STEPS = ["Waking", "Online", "Unlocking"]
+STEPS = ["Waking", "Online"]
 
 STATE_WAKING = "WAKING"
 STATE_POLLING = "POLLING"
-STATE_UNLOCKING = "UNLOCKING"
 STATE_DONE = "DONE"
 STATE_ERROR = "ERROR"
 
 _STATE_STEP = {
     STATE_WAKING: 0,
     STATE_POLLING: 1,
-    STATE_UNLOCKING: 2,
-    STATE_DONE: 3,
+    STATE_DONE: 2,
     STATE_ERROR: 0,
 }
 
 _STATE_DESC = {
     STATE_WAKING: "Sending Wake-on-LAN magic packet...",
     STATE_POLLING: "Waiting for PC to come online...",
-    STATE_UNLOCKING: "Sending unlock signal...",
     STATE_DONE: "Done!",
 }
 
