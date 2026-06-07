@@ -8,7 +8,7 @@ set -e
 # ── Config ────────────────────────────────────────────────────────────────────
 REPO_URL="https://github.com/eleonne/awake-on-deck.git"
 REPO_DIR="/home/deck/awake-on-deck"
-APP_DIR="$REPO_DIR/steamdeck-client"
+APP_DIR="$REPO_DIR"
 APP_NAME="Awake on Deck"
 PYTHON="/usr/bin/python3"
 
