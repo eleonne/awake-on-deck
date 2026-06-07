@@ -22,6 +22,7 @@ SUBTITLE_COLOR = (180, 180, 200)
 class HomeScreen:
     on_wake_connect: Callable[[], None]
     on_settings: Callable[[], None]
+    on_close: Callable[[], None] = field(default=lambda: None)
     font_large: Optional[pygame.font.Font] = field(default=None, compare=False)
     font_medium: Optional[pygame.font.Font] = field(default=None, compare=False)
     font_small: Optional[pygame.font.Font] = field(default=None, compare=False)
@@ -48,33 +49,29 @@ class HomeScreen:
 
         btn_width = 360
         btn_height = 60
+        btn_gap = 80
         center_x = width // 2
-
-        wake_rect = pygame.Rect(
-            center_x - btn_width // 2,
-            height // 2 - 60,
-            btn_width,
-            btn_height,
-        )
-        settings_rect = pygame.Rect(
-            center_x - btn_width // 2,
-            height // 2 + 20,
-            btn_width,
-            btn_height,
-        )
+        top = height // 2 - btn_height - btn_gap // 2
 
         self.buttons = [
             Button(
                 text="Wake & Connect",
-                rect=wake_rect,
+                rect=pygame.Rect(center_x - btn_width // 2, top, btn_width, btn_height),
                 on_activate=self.on_wake_connect,
                 focused=True,
                 font=font_medium,
             ),
             Button(
                 text="Settings",
-                rect=settings_rect,
+                rect=pygame.Rect(center_x - btn_width // 2, top + btn_gap, btn_width, btn_height),
                 on_activate=self.on_settings,
+                focused=False,
+                font=font_medium,
+            ),
+            Button(
+                text="Close",
+                rect=pygame.Rect(center_x - btn_width // 2, top + btn_gap * 2, btn_width, btn_height),
+                on_activate=self.on_close,
                 focused=False,
                 font=font_medium,
             ),

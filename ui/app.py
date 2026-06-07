@@ -81,6 +81,7 @@ class App:
         self._home_screen = HomeScreen(
             on_wake_connect=self._start_wake_connect,
             on_settings=self._open_settings,
+            on_close=self._quit,
         )
         self._home_screen.setup(WIDTH, HEIGHT, font_large, font_medium, font_small)
 
@@ -238,6 +239,10 @@ class App:
         save_config(config)
         logger.info("Settings saved")
         self._go_home()
+
+    def _quit(self) -> None:
+        """Post a QUIT event to cleanly exit the main loop."""
+        pygame.event.post(pygame.event.Event(pygame.QUIT))
 
     def _go_home(self) -> None:
         """Switch to home screen."""
