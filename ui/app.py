@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import queue
+import socket
 import threading
 from dataclasses import dataclass, field
 from enum import Enum, auto
@@ -48,9 +49,15 @@ class StateMessage:
 
 
 @dataclass
+class PcStatusMessage:
+    online: bool
+
+
+@dataclass
 class AppState:
     config: Config
     current_screen: Screen = Screen.HOME
+    pc_online: Optional[bool] = None
     ui_queue: queue.Queue = field(default_factory=queue.Queue)
     cancel_event: threading.Event = field(default_factory=threading.Event)
 
@@ -60,6 +67,7 @@ class App:
         self._state = AppState(config=load_config())
         self._joystick: Optional[pygame.joystick.JoystickType] = None
         self._previous_screen: Screen = Screen.HOME
+        self._checker_stop = threading.Event()
 
         pygame.mixer.pre_init(44100, -16, 2, 512)
         pygame.init()
@@ -73,6 +81,8 @@ class App:
             self._joystick = pygame.joystick.Joystick(0)
             self._joystick.init()
             logger.info("Joystick initialized: %s", self._joystick.get_name())
+
+        threading.Thread(target=self._pc_status_worker, daemon=True).start()
 
         font_large = pygame.font.SysFont(None, 64)
         font_medium = pygame.font.SysFont(None, 36)
@@ -131,7 +141,11 @@ class App:
             while True:
                 try:
                     msg = self._state.ui_queue.get_nowait()
-                    self._handle_state_message(msg)
+                    if isinstance(msg, PcStatusMessage):
+                        self._state.pc_online = msg.online
+                        self._home_screen.pc_online = msg.online
+                    else:
+                        self._handle_state_message(msg)
                 except queue.Empty:
                     break
 
@@ -139,6 +153,7 @@ class App:
             pygame.display.flip()
             self._clock.tick(FPS)
 
+        self._checker_stop.set()
         pygame.quit()
         logger.info("App exited")
 
@@ -168,6 +183,17 @@ class App:
         self._status_screen.update_state(STATE_WAKING)
         t = threading.Thread(target=self._worker, daemon=True)
         t.start()
+
+    def _pc_status_worker(self) -> None:
+        """Probe the PC periodically and push online/offline status to the UI queue."""
+        while not self._checker_stop.is_set():
+            cfg = self._state.config
+            try:
+                with socket.create_connection((cfg.pc_ip, cfg.poll_tcp_port), timeout=2):
+                    self._state.ui_queue.put(PcStatusMessage(online=True))
+            except OSError:
+                self._state.ui_queue.put(PcStatusMessage(online=False))
+            self._checker_stop.wait(10)
 
     def _worker(self) -> None:
         """Background thread: WoL → poll → unlock → done."""

@@ -23,6 +23,7 @@ class HomeScreen:
     on_wake_connect: Callable[[], None]
     on_settings: Callable[[], None]
     on_close: Callable[[], None] = field(default=lambda: None)
+    pc_online: Optional[bool] = None
     font_large: Optional[pygame.font.Font] = field(default=None, compare=False)
     font_medium: Optional[pygame.font.Font] = field(default=None, compare=False)
     font_small: Optional[pygame.font.Font] = field(default=None, compare=False)
@@ -96,6 +97,19 @@ class HomeScreen:
             )
             sub_rect = sub_surf.get_rect(centerx=self.width // 2, top=160)
             surface.blit(sub_surf, sub_rect)
+
+            if self.pc_online is True:
+                indicator_color = (60, 200, 100)
+                indicator_text = "● PC Online"
+            elif self.pc_online is False:
+                indicator_color = (200, 80, 80)
+                indicator_text = "● PC Offline"
+            else:
+                indicator_color = (150, 150, 170)
+                indicator_text = "● Checking..."
+            ind_surf = self.font_small.render(indicator_text, True, indicator_color)
+            ind_rect = ind_surf.get_rect(centerx=self.width // 2, top=220)
+            surface.blit(ind_surf, ind_rect)
 
         for btn in self.buttons:
             btn.draw(surface)
