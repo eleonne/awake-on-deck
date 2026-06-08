@@ -18,8 +18,6 @@ def make_config(**kwargs) -> Config:
         "pc_ip": "192.168.1.100",
         "wol_broadcast": "192.168.1.255",
         "wol_port": 9,
-        "agent_port": 9876,
-        "agent_secret": "",
         "poll_timeout_seconds": 5,
         "poll_interval_seconds": 1,
         "poll_tcp_port": 445,

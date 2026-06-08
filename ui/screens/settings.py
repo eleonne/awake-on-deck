@@ -23,7 +23,7 @@ FIELD_BG_EDITING = (30, 50, 80)
 FIELD_BORDER = (80, 80, 120)
 FOCUS_BORDER = 3
 
-INT_FIELDS = {"wol_port", "agent_port", "poll_timeout_seconds", "poll_interval_seconds", "poll_tcp_port"}
+INT_FIELDS = {"wol_port", "poll_timeout_seconds", "poll_interval_seconds", "poll_tcp_port"}
 
 
 @dataclass
@@ -106,8 +106,6 @@ class SettingsScreen:
             ("PC MAC Address", "pc_mac"),
             ("WoL Broadcast", "wol_broadcast"),
             ("WoL Port", "wol_port"),
-            ("Agent Port", "agent_port"),
-            ("Agent Secret", "agent_secret"),
             ("Poll Timeout (s)", "poll_timeout_seconds"),
             ("Poll Interval (s)", "poll_interval_seconds"),
             ("Poll TCP Port", "poll_tcp_port"),
