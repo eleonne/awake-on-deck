@@ -178,9 +178,12 @@ while time.monotonic() < deadline:
             name = entry.get("AppName") or entry.get("appname", "")
             if name != app_name:
                 continue
+            print(f"  APP NAME: {name}")
             raw = entry.get("appid") or entry.get("appId") or entry.get("AppId")
+            print(f"  APP ID RAW: {raw}")
             if raw is not None and int(raw) != 0:
                 app_id = int(raw) & 0xffffffff
+                print(f"  APP ID: {app_id}")
                 break
     except Exception:
         pass
