@@ -147,8 +147,9 @@ with open(shortcuts_file, "wb") as f:
 print(f"  Shortcut written (index {next_key}).")
 
 # Steam artwork for non-Steam shortcuts is keyed by a CRC32-derived game ID.
-# Formula: crc32(Exe_field + AppName) | 0x80000000
-crc     = binascii.crc32((exe_field + app_name).encode("utf-8"))
+# Formula: crc32(raw_exe_path + AppName) | 0x80000000
+# The VDF stores the exe with surrounding quotes, but the CRC uses the bare path.
+crc     = binascii.crc32((launch_sh + app_name).encode("utf-8"))
 game_id = (crc | 0x80000000) & 0xffffffff
 
 grid_dir = os.path.join(os.path.dirname(shortcuts_file), "grid")
