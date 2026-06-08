@@ -95,7 +95,7 @@ info "Shortcuts file: $SHORTCUTS_FILE"
 mkdir -p "$SHORTCUTS_DIR"
 
 $PYTHON - <<PYEOF
-import sys, os, binascii, shutil
+import sys, os
 sys.path.insert(0, "$APP_DIR/lib")
 
 import vdf, time
@@ -119,11 +119,9 @@ for k in to_remove:
 
 next_key = str(max((int(k) for k in shortcuts.keys()), default=-1) + 1)
 
-exe_field = f'"{launch_sh}"'
-
 shortcuts[next_key] = {
     "AppName":             app_name,
-    "Exe":                 exe_field,
+    "Exe":                 f'"{launch_sh}"',
     "StartDir":            f'"{app_dir}"',
     "icon":                f"{app_dir}/img/icon.png",
     "ShortcutPath":        "",
@@ -145,20 +143,64 @@ with open(shortcuts_file, "wb") as f:
     vdf.binary_dump(data, f)
 
 print(f"  Shortcut written (index {next_key}).")
+PYEOF
 
-# Steam artwork for non-Steam shortcuts is keyed by a CRC32-derived game ID.
-# Formula: crc32(raw_exe_path + AppName) | 0x80000000
-# The VDF stores the exe with surrounding quotes, but the CRC uses the bare path.
-crc     = binascii.crc32((launch_sh + app_name).encode("utf-8"))
-game_id = (crc | 0x80000000) & 0xffffffff
+success "'$APP_NAME' added to Steam shortcuts."
+
+# ── 6. Relaunch Steam ─────────────────────────────────────────────────────────
+info "Relaunching Steam ..."
+nohup steam > /dev/null 2>&1 &
+disown
+
+# ── 7. Wait for Steam to assign the app ID, then install artwork ──────────────
+info "Waiting for Steam to assign app ID and installing artwork ..."
+
+$PYTHON - <<PYEOF
+import sys, os, shutil, time
+sys.path.insert(0, "$APP_DIR/lib")
+import vdf
+
+shortcuts_file = "$SHORTCUTS_FILE"
+app_name       = "$APP_NAME"
+app_dir        = "$APP_DIR"
+
+# Poll shortcuts.vdf until Steam writes back the appid for our shortcut.
+# Steam assigns and persists appids during its startup sequence.
+app_id  = None
+deadline = time.monotonic() + 60
+
+while time.monotonic() < deadline:
+    time.sleep(3)
+    try:
+        with open(shortcuts_file, "rb") as f:
+            data = vdf.binary_load(f)
+        for entry in data.get("shortcuts", {}).values():
+            name = entry.get("AppName") or entry.get("appname", "")
+            if name != app_name:
+                continue
+            raw = entry.get("appid") or entry.get("appId") or entry.get("AppId")
+            if raw is not None and int(raw) != 0:
+                app_id = int(raw) & 0xffffffff
+                break
+    except Exception:
+        pass
+    if app_id:
+        break
+
+if not app_id:
+    print("  Warning: Steam did not write an app ID within 60 seconds.")
+    print("  You can add artwork manually via the game properties in Steam.")
+    sys.exit(0)
+
+print(f"  App ID: {app_id}")
 
 grid_dir = os.path.join(os.path.dirname(shortcuts_file), "grid")
 os.makedirs(grid_dir, exist_ok=True)
 
 artwork = [
-    ("img/icon.png",  f"{game_id}_icon.png"),
-    ("img/hero.jpg",  f"{game_id}_hero.jpg"),
-    ("img/grid.jpg",  f"{game_id}p.jpg"),
+    ("img/icon.png",  f"{app_id}_icon.png"),
+    ("img/hero.jpg",  f"{app_id}_hero.jpg"),
+    ("img/grid.jpg",  f"{app_id}p.jpg"),
 ]
 for rel_src, dst_name in artwork:
     src = os.path.join(app_dir, rel_src)
@@ -169,13 +211,6 @@ for rel_src, dst_name in artwork:
     else:
         print(f"  Warning: artwork not found: {src}")
 PYEOF
-
-success "'$APP_NAME' added to Steam shortcuts."
-
-# ── 6. Relaunch Steam ─────────────────────────────────────────────────────────
-info "Relaunching Steam ..."
-nohup steam > /dev/null 2>&1 &
-disown
 
 success "Done! '$APP_NAME' will appear in your Steam library under Non-Steam games."
 echo ""
