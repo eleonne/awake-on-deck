@@ -1,15 +1,17 @@
-"""Configuration management for steamdeck-client."""
+"""Configuration management for awake-on-deck."""
 
 from __future__ import annotations
 
 import json
 import logging
+import os
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-CONFIG_DIR = Path.home() / ".config" / "steamdeck-client"
+_APPDATA = Path(os.environ.get("APPDATA") or (Path.home() / "AppData" / "Roaming"))
+CONFIG_DIR = _APPDATA / "awake-on-deck"
 CONFIG_FILE = CONFIG_DIR / "config.json"
 
 

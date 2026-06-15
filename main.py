@@ -1,4 +1,4 @@
-"""Entry point for Awake on Deck — Steam Deck client."""
+"""Entry point for Awake on Deck."""
 
 from __future__ import annotations
 
@@ -7,7 +7,8 @@ import os
 import sys
 from pathlib import Path
 
-LOG_DIR = Path.home() / ".local" / "share" / "steamdeck-client"
+_LOCALAPPDATA = Path(os.environ.get("LOCALAPPDATA") or (Path.home() / "AppData" / "Local"))
+LOG_DIR = _LOCALAPPDATA / "awake-on-deck"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()

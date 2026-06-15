@@ -27,8 +27,8 @@ from wol import WoLError, send_wol
 
 logger = logging.getLogger(__name__)
 
-WIDTH = 1280
-HEIGHT = 800
+WIDTH = 1920
+HEIGHT = 1080
 FPS = 30
 BG = (26, 26, 46)
 
@@ -82,9 +82,9 @@ class App:
 
         threading.Thread(target=self._pc_status_worker, daemon=True).start()
 
-        font_large = pygame.font.SysFont(None, 64)
-        font_medium = pygame.font.SysFont(None, 36)
-        font_small = pygame.font.SysFont(None, 28)
+        font_large = pygame.font.SysFont(None, 86)
+        font_medium = pygame.font.SysFont(None, 48)
+        font_small = pygame.font.SysFont(None, 38)
 
         self._home_screen = HomeScreen(
             on_wake_connect=self._start_wake_connect,
