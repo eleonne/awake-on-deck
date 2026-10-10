@@ -1,0 +1,50 @@
+# ── Python (steamdeck-client) ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Type checkers
+.mypy_cache/
+.ruff_cache/
+
+# ── C# / .NET (windows-client) ───────────────────────────────────────────────
+# Build output
+windows-client/**/bin/
+windows-client/**/obj/
+
+# NuGet
+windows-client/**/*.user
+windows-client/**/.vs/
+
+# Publish output
+windows-client/**/publish/
+
+# ── IDEs ─────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.user
+
+# ── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Claude Code (per-machine settings) ──────────────────────────────────────
+.claude/settings.local.json
