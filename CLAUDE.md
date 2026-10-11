@@ -12,6 +12,7 @@ steamdeck-client/
 ├── README.md
 ├── pyproject.toml
 ├── requirements.txt          # pinned deps, installed into lib/
+├── awake-on-deck-installer.desktop  # Double-click installer for Desktop Mode: opens Konsole running curl install.sh | bash
 ├── launch.sh                 # Steam shortcut target — sets env vars, patches sys.path, exec python3 main.py
 ├── main.py                   # Entry point: patches sys.path, inits pygame, runs app loop
 ├── config.py                 # Config dataclass, load/save to ~/.config/steamdeck-client/config.json

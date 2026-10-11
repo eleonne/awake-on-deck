@@ -20,11 +20,15 @@ A Steam Deck app that wakes your Windows PC via Wake-on-LAN and hands off to Ste
 On your Steam Deck:
 
 1. Switch to **Desktop Mode** (Steam button → Power → Switch to Desktop)
-2. Open a terminal (Konsole) and run:
+2. Download [awake-on-deck-installer.desktop](https://github.com/eleonne/awake-on-deck/blob/main/awake-on-deck-installer.desktop) (click **Download raw file**), then double-click it and choose **Continue** when KDE asks. A terminal opens and runs the installer.
+
+   Or open a terminal (Konsole) and run:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/eleonne/awake-on-deck/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/eleonne/awake-on-deck/main/install.sh | bash
 ```
+
+See [usage.md](usage.md) for the full setup guide.
 
 The installer will:
 - Clone the repository to `/home/deck/awake-on-deck`

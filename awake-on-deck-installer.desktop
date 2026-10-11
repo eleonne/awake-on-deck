@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Type=Application
+Name=Install Awake on Deck
+Comment=Download and install Awake on Deck, then add it to your Steam library
+Icon=system-software-install
+Terminal=true
+Exec=bash -c "curl -fsSL https://raw.githubusercontent.com/eleonne/awake-on-deck/main/install.sh | bash; echo; read -r -p 'Press Enter to close this window...'"
+StartupNotify=false

@@ -42,10 +42,20 @@ Both devices must be on the **same local network**.
 ### Steam Deck
 
 1. Switch to **Desktop Mode** (Steam button → Power → Switch to Desktop).
-2. Open **Konsole** and run:
+2. Run the installer in either of these ways:
+
+   **Option A: download and double-click (no typing)**
+   1. In the Deck's web browser, open [awake-on-deck-installer.desktop](https://github.com/eleonne/awake-on-deck/blob/main/awake-on-deck-installer.desktop) and click the **Download raw file** button (the download arrow at the top right of the file).
+   2. Open your **Downloads** folder (or drag the file onto the desktop) and double-click **Install Awake on Deck**.
+   3. The first time, KDE asks whether to run a launcher downloaded from the internet. Choose **Continue** (or **Execute**).
+   4. A terminal window opens and runs the installer. When it says **Done!**, press **Enter** to close it. You can then delete the downloaded file.
+
+   **Option B: type the command**
+
+   Open **Konsole** and run:
 
    ```bash
-   curl -sSL https://raw.githubusercontent.com/eleonne/awake-on-deck/main/install.sh | bash
+   curl -fsSL https://raw.githubusercontent.com/eleonne/awake-on-deck/main/install.sh | bash
    ```
 
 The installer:
@@ -183,7 +193,7 @@ To see more detail in the log, start the app with `LOG_LEVEL=DEBUG` set in its e
 
 Re-run the same installer you used originally. It pulls the latest version and reinstalls the dependencies.
 
-- **Steam Deck** (Desktop Mode): `bash /home/deck/awake-on-deck/install.sh`
+- **Steam Deck** (Desktop Mode): double-click the **Install Awake on Deck** launcher again, or run `bash /home/deck/awake-on-deck/install.sh`
 - **Windows**: run the `irm ... | iex` command from section 2 again
 
 > The update **discards any local changes** in the app folder. Your settings are not affected, because they live in the config file, outside the app folder.
